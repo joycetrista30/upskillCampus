@@ -3,6 +3,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ExpenseTracker {
     private static ArrayList<Expense> expenseList = new ArrayList<>();
@@ -12,9 +14,11 @@ public class ExpenseTracker {
     private static final String FILE_NAME = "expenses.txt";
 
     public static void main(String[] args) {
-        categories.add("Food");
-        categories.add("Transport");
-        categories.add("Bills");
+        if (categories.isEmpty()) {
+            categories.add("Food");
+            categories.add("Transport");
+            categories.add("Bills");
+        }
         loadFromFile();
         int choice;
         do {
@@ -25,8 +29,9 @@ public class ExpenseTracker {
             System.out.println("4. Delete Expense");
             System.out.println("5. Edit Expense");
             System.out.println("6. Filter by Category");
-            System.out.println("7. Exit");
-            System.out.print("Choose an option (1-7): ");
+            System.out.println("7. View Financial Summary");
+            System.out.println("8. Exit");
+            System.out.print("Choose an option (1-8): ");
             
             while (!scanner.hasNextInt()) { 
                 System.out.println("Error : Please enter a valid number!");
@@ -54,14 +59,17 @@ public class ExpenseTracker {
                 case 6:
                     filterByCategory();
                     break;
-                case 7:
+                case 7: 
+                    viewSummary();
+                    break;
+                case 8:
                     saveToFile();
                     System.out.println("Thank You for using the application!");
                     break;
                 default:
                     System.out.println("Invalid choice! Please try again");
             }
-        } while (choice != 7);
+        } while (choice != 8);
     }
 
     private static void addExpense() {
@@ -182,5 +190,28 @@ public class ExpenseTracker {
         } catch (Exception e) {
             System.out.println("Error loading data."); // [cite: 183]
         }
+    }
+    private static void viewSummary() {
+        if (expenseList.isEmpty()) {
+            System.out.println("No records to summarize.");
+            return;
+        }
+
+        double total = 0;
+        Map<String, Double> categoryTotals = new HashMap<>();
+
+        for (Expense e : expenseList) {
+            total += e.getAmount();
+            categoryTotals.put(e.getCategory(), categoryTotals.getOrDefault(e.getCategory(), 0.0) + e.getAmount());
+        }
+
+        System.out.println("\n========== FINANCIAL SUMMARY ==========");
+        System.out.println("Total Expenditure: Rp" + total);
+        System.out.println("---------------------------------------");
+        System.out.println("Breakdown by Category:");
+        for (Map.Entry<String, Double> entry : categoryTotals.entrySet()) {
+            System.out.println("- " + entry.getKey() + ": Rp" + entry.getValue());
+        }
+        System.out.println("=======================================");
     }
 }
